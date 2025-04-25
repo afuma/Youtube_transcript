@@ -1,34 +1,61 @@
-from youtube_transcript_api import YouTubeTranscriptApi
-
-class YoutubeTranscript:
-    def __init__(self, video_id, language='fr'):
-        self.video_id = video_id
-        self.language = language
-
-    def get_transcript_text(self):
-        try:
-            transcript = YouTubeTranscriptApi.get_transcript(self.video_id, languages=[self.language])
-            text = ''
-            for line in transcript:
-                text += line['text'] + ' '
-            return text
-        except Exception as e:
-            print(f"Une erreur s'est produite : {e}")
-            return None
-
-    def save_transcript_text(self, transcript_text, filename="texte.txt"):
-        try:
-            with open(filename, 'w') as f:
-                f.write(transcript_text)
-            print(f"Transcription sauvegardée dans {filename}")
-        except Exception as e:
-            print(f"Une erreur s'est produite lors de la sauvegarde de la transcription : {e}")
+from youtube_service import YoutubeTranscript
 
 if __name__ == "__main__":
-    video_id = input("Entrez l'ID de la video: ")
-    yt_transcript = YoutubeTranscript(video_id)
-    transcript_text = yt_transcript.get_transcript_text()
-    if transcript_text:
-        yt_transcript.save_transcript_text(transcript_text)
-    else:
-        print("Impossible de récupérer la transcription de la vidéo.")
+    yt_transcript = YoutubeTranscript()
+    
+    while True:
+        print("\nChoisissez une option:")
+        print("1. Traiter une seule URL YouTube")
+        print("2. Traiter un fichier contenant des URLs")
+        print("3. Télécharger l'audio d'une vidéo YouTube")
+        print("4. Télécharger une vidéo YouTube complète")
+        print("5. Télécharger un extrait de vidéo YouTube")
+        print("6. Quitter")
+        
+        choice = input("Votre choix (1-6): ")
+        
+        if choice == "1":
+            url = input("Entrez l'URL de la vidéo YouTube: ")
+            video_id = yt_transcript.extract_video_id(url)
+            if video_id:
+                transcript_text = yt_transcript.get_transcript_text(video_id)
+                if transcript_text:
+                    yt_transcript.save_transcript_text(transcript_text, video_id)
+        
+        elif choice == "2":
+            filename = input("Entrez le nom du fichier contenant les URLs: ")
+            yt_transcript.process_url_file(filename)
+        
+        elif choice == "3":
+            url = input("Entrez l'URL de la vidéo YouTube: ")
+            video_id = yt_transcript.extract_video_id(url)
+            if video_id:
+                yt_transcript.download_audio(video_id)
+        
+        elif choice == "4":
+            url = input("Entrez l'URL de la vidéo YouTube: ")
+            quality = input("Choisissez la qualité (720p, 480p, 360p, 240p) [720p]: ").lower() or "720p"
+            video_id = yt_transcript.extract_video_id(url)
+            if video_id:
+                yt_transcript.download_video(video_id, quality)
+
+        elif choice == "5":
+            url = input("Entrez l'URL de la vidéo YouTube: ")
+            quality = input("Choisissez la qualité (720p, 480p, 360p, 240p) [720p]: ").lower() or "720p"
+            try:
+                start = input("Temps de début (en secondes): ")
+                end = input("Temps de fin (en secondes): ")
+                start_time = int(start)
+                end_time = int(end)
+                video_id = yt_transcript.extract_video_id(url)
+                if video_id:
+                    yt_transcript.download_video_clip(video_id, start_time, end_time, quality)
+            except ValueError:
+                print("Erreur: Les temps doivent être des nombres entiers en secondes")
+
+        elif choice == "6":
+            print("Au revoir!")
+            break
+        
+        else:
+            print("Option invalide. Veuillez choisir 1, 2, 3, 4, 5 ou 6.")

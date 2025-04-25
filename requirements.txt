@@ -1,0 +1,7 @@
+youtube-transcript-api>=0.6.1
+yt-dlp>=2025.1.26
+
+# Note: ffmpeg is required for audio conversion
+# Install on Ubuntu/Debian: sudo apt-get install ffmpeg
+# Install on macOS: brew install ffmpeg
+# Install on Windows: Download from https://ffmpeg.org/download.html
